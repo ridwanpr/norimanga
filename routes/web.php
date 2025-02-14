@@ -12,3 +12,5 @@ Route::get('/', function () {
 Route::get('fetch-genres', [GenreController::class, 'fetchGenres']);
 Route::get('fetch-all-manga', [MangaController::class, 'fetchAllManga']);
 Route::get('fetch-all-manga-details', [MangaDetailController::class, 'fetchAllMangaDetails']);
+
+Route::get('fetch-all-chapter', [MangaDetailController::class, 'fetchChapter']);

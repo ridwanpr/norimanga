@@ -18,6 +18,8 @@ class MangaDetail extends Model
         'artist',
         'views',
         'synopsis',
+        'cover',
+        'bucket',
     ];
 
     // ✅ One-to-One: MangaDetail belongs to Manga

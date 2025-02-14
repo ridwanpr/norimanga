@@ -23,18 +23,19 @@ return new class extends Migration
             $table->unsignedBigInteger('manga_id');
             $table->foreign('manga_id')->references('id')->on('manga')->onDelete('cascade');
             $table->string('status', 15);
+            $table->string('cover');
             $table->string('type', 15);
-            $table->year('release_year');
-            $table->string('author', 75);
-            $table->string('artist', 75);
-            $table->integer('views')->nullable()->default(null);
+            $table->string('release_year')->nullable()->default(null);
+            $table->text('author')->nullable()->default(null);
+            $table->string('artist', 250)->nullable()->default(null);
+            $table->integer('views')->nullable()->default(0);
             $table->text('synopsis')->nullable()->default(null);
             $table->timestamps();
         });
 
         Schema::create('genres', function (Blueprint $table) {
             $table->id();
-            $table->string('name', 75);
+            $table->string('name', 50);
             $table->string('slug');
             $table->timestamps();
         });

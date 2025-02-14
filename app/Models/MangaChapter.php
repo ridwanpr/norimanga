@@ -15,6 +15,7 @@ class MangaChapter extends Model
         'chapter_number',
         'slug',
         'image',
+        'bucket'
     ];
 
     // ✅ One-to-Many: MangaChapter belongs to Manga

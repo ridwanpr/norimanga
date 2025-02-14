@@ -12,8 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('manga_detail', function (Blueprint $table) {
-            $table->year('release_year')->nullable()->change();
-            $table->string('artist', 75)->nullable()->change();
+            $table->string('bucket', 10)->nullable();
+        });
+
+        Schema::table('manga_chapters', function (Blueprint $table) {
+            $table->string('bucket', 10)->nullable();
         });
     }
 
@@ -22,9 +25,12 @@ return new class extends Migration
      */
     public function down(): void
     {
+        Schema::table('manga_chapters', function (Blueprint $table) {
+            $table->dropColumn('bucket');
+        });
+
         Schema::table('manga_detail', function (Blueprint $table) {
-            $table->year('release_year')->change();
-            $table->string('artist', 75)->change();
+            $table->dropColumn('bucket');
         });
     }
 };
