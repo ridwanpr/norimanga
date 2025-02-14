@@ -29,13 +29,16 @@ class MangaDetailController extends Controller
         $chapters = MangaChapter::whereNull('image')
             ->orWhere('image', '[]')
             ->orderBy('slug', 'asc')
-            ->limit(3)
-            ->get();
+            ->chunk(100)
+            ->each(function ($chapters) {
+                foreach ($chapters as $index => $chapter) {
+                    $delayInSeconds = rand(60, 300) + ($index * 30);
 
-        foreach ($chapters as $chapter) {
-            FetchChapterImagesJob::dispatch($chapter)
-                ->delay(now()->addSeconds(rand(1, 30)));
-        }
+                    FetchChapterImagesJob::dispatch($chapter)
+                        ->onQueue('chapter-images')
+                        ->delay(now()->addSeconds($delayInSeconds));
+                }
+            });
 
         return response()->json(['success' => true, 'message' => "Queued " . count($chapters) . " chapters for processing."]);
     }
