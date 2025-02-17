@@ -2,15 +2,17 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Cache;
+use App\Models\BucketUsage;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Storage;
 
 class BucketManager
 {
     private const BUCKET_PREFIX = 's';
     private const BUCKET_START = 3;
-    private const BUCKET_END = 7;
+    private const BUCKET_END = 5;
     private const BUCKET_THRESHOLD_GB = 24;
     private const CACHE_KEY = 'current_bucket';
     private const CACHE_DURATION_MINUTES = 60;
@@ -38,12 +40,19 @@ class BucketManager
         $bucket = $this->getCurrentBucket();
 
         try {
-            // Store the file
             Storage::disk($bucket)->put($path, $contents, $options);
+
+            $size = strlen($contents); // Get file size
+
+            // Update database record
+            BucketUsage::updateOrCreate(
+                ['bucket_name' => $bucket],
+                ['total_bytes' => DB::raw("total_bytes + {$size}")]
+            );
 
             return [
                 'bucket' => $bucket,
-                'url' => Storage::disk($bucket)->url($path)
+                'url' => Storage::disk($bucket)->url($path),
             ];
         } catch (\Exception $e) {
             Log::error("Failed to store file in bucket {$bucket}: " . $e->getMessage());
@@ -85,7 +94,15 @@ class BucketManager
     public function deleteFile(string $bucket, string $path): bool
     {
         try {
-            return Storage::disk($bucket)->delete($path);
+            $size = Storage::disk($bucket)->size($path);
+            $deleted = Storage::disk($bucket)->delete($path);
+
+            if ($deleted) {
+                BucketUsage::where('bucket_name', $bucket)
+                    ->update(['total_bytes' => DB::raw("GREATEST(total_bytes - {$size}, 0)")]);
+            }
+
+            return $deleted;
         } catch (\Exception $e) {
             Log::error("Failed to delete file from bucket {$bucket}: " . $e->getMessage());
             return false;
