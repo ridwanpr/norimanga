@@ -76,20 +76,9 @@ class BucketManager
 
     private function getBucketUsageGB(string $bucket): float
     {
-        try {
-            $files = Storage::disk($bucket)->allFiles();
-            $totalBytes = 0;
-
-            foreach ($files as $file) {
-                $totalBytes += Storage::disk($bucket)->size($file);
-            }
-
-            return $totalBytes / (1024 * 1024 * 1024); // Convert to GB
-        } catch (\Exception $e) {
-            Log::error("Failed to get bucket usage for {$bucket}: " . $e->getMessage());
-            return 0;
-        }
-    }
+        $usage = BucketUsage::where('bucket_name', $bucket)->value('total_bytes');
+        return $usage ? $usage / (1024 * 1024 * 1024) : 0;
+    }    
 
     public function deleteFile(string $bucket, string $path): bool
     {
