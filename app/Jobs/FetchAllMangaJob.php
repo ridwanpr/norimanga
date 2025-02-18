@@ -37,13 +37,13 @@ class FetchAllMangaJob implements ShouldQueue
 
             if ($response->successful()) {
                 Log::info('Successfully fetched the webpage');
-                Log::info('HTML: ' . $response->body());
                 
                 $dom = new DOMDocument();
                 @$dom->loadHTML($response->body(), LIBXML_NOERROR | LIBXML_NOWARNING);
                 $xpath = new DOMXPath($dom);
                 $mangaLinks = $xpath->query("//div[@class='soralist']//div[@class='blix']//li/a");
 
+                Log::info('Found ' . $mangaLinks->length . ' manga titles');
                 foreach ($mangaLinks as $link) {
                     $title = trim($link->textContent);
                     $url = $link->getAttribute('href');
