@@ -17,7 +17,7 @@ class MangaDetailController extends Controller
             return response()->json(['success' => true, 'message' => "No manga found to queue."]);
         }
 
-        Manga::chunk(100, function ($mangaBatch) {
+        Manga::chunk(10, function ($mangaBatch) {
             FetchMangaDetailsBatchJob::dispatch($mangaBatch)->delay(rand(2, 5));
         });
 
